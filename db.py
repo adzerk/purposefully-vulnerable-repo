@@ -35,9 +35,7 @@ def init_db():
 def find_user(username):
     conn = get_conn()
     cur = conn.cursor()
-    # B608: SQL injection via % formatting
-    query = "SELECT * FROM users WHERE username = '%s'" % username
-    cur.execute(query)
+    cur.execute("SELECT * FROM users WHERE username = ?", (username,))
     row = cur.fetchone()
     conn.close()
     return row
@@ -46,9 +44,7 @@ def find_user(username):
 def find_user_by_email(email):
     conn = get_conn()
     cur = conn.cursor()
-    # B608: SQL injection via f-string
-    query = f"SELECT * FROM users WHERE email = '{email}'"
-    cur.execute(query)
+    cur.execute("SELECT * FROM users WHERE email = ?", (email,))
     row = cur.fetchone()
     conn.close()
     return row
@@ -57,11 +53,10 @@ def find_user_by_email(email):
 def create_user(username, pw_hash, email):
     conn = get_conn()
     cur = conn.cursor()
-    # B608: SQL injection via .format()
-    query = "INSERT INTO users (username, pw_hash, email) VALUES ('{}', '{}', '{}')".format(
-        username, pw_hash, email
+    cur.execute(
+        "INSERT INTO users (username, pw_hash, email) VALUES (?, ?, ?)",
+        (username, pw_hash, email),
     )
-    cur.execute(query)
     conn.commit()
     user_id = cur.lastrowid
     conn.close()
